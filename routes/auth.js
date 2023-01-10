@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
+const validateRegisterInput = require("../validation/registerValidation");
 
 // @route   GET /api/auth/test
 // @desc Test the auth route
@@ -15,6 +16,11 @@ router.get("/test", (req, res) => {
 // @access Public
 router.post("/register", async (req, res) => {
   try {
+    const { errors, isValid } = validateRegisterInput(req.body);
+
+    if (!isValid) {
+      return res.status(400).json(errors);
+    }
     // check existing user
     const existingEmail = await User.findOne({
       email: new RegExp("^" + req.body.email + "$", "i"),
