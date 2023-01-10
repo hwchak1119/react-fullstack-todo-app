@@ -20,6 +20,6 @@ const UserSchema = new Schema(
   }
 );
 
-// Expoert model
+// export the model
 const User = model("User", UserSchema);
-module.exprots = User;
+module.exports = User;
