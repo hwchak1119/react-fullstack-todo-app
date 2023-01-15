@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const validateRegisterInput = require("../validation/registerValidation");
+const jwt = require("jsonwebtoken");
 
 // @route   GET /api/auth/test
 // @desc Test the auth route
@@ -72,7 +73,29 @@ router.post("/login", async (req, res) => {
       user.password
     );
 
-    return res.json({ passwordMatch: passwordMatch });
+    if (!passwordMatch) {
+      return res.status(400).json({ error: "Password not match" });
+    }
+
+    const payload = { userId: user._id };
+
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    res.cookie("access-token", token, {
+      expires: new Date(Date.now() + 7 * 60 * 60 * 1000),
+      httpOnly: true, // cannot access by console or code
+      secure: process.env.NODE_ENV === "production",
+    });
+
+    const userToRetrun = { ...user._doc };
+    delete userToRetrun.password;
+
+    return res.json({
+      token: token,
+      user: userToRetrun,
+    });
   } catch (error) {
     return res.status(500).send(error.message);
   }
