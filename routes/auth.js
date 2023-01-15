@@ -51,4 +51,31 @@ router.post("/register", async (req, res) => {
   }
 });
 
+// @route   POST /api/auth/loggin
+// @desc Login and return access token
+// @access Public
+router.post("/login", async (req, res) => {
+  try {
+    // check user
+    const user = await User.findOne({
+      email: new RegExp("^" + req.body.email + "$", "i"),
+    });
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ error: "Problem found with your login credentials" });
+    }
+
+    const passwordMatch = await bcrypt.compare(
+      req.body.password,
+      user.password
+    );
+
+    return res.json({ passwordMatch: passwordMatch });
+  } catch (error) {
+    return res.status(500).send(error.message);
+  }
+});
+
 module.exports = router;
