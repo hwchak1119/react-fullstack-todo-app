@@ -40,7 +40,10 @@ router.post("/register", async (req, res) => {
 
     const savedUser = await newUser.save();
 
-    return res.json(savedUser);
+    const userToRetrun = { ...savedUser._doc };
+    delete userToRetrun.password;
+
+    return res.json(userToRetrun);
   } catch (error) {
     console.log(error);
 
